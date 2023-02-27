@@ -1,0 +1,70 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 380px;
+  width: 280px;
+  border-radius: 1rem;
+  box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.25);
+  background-color: var(--quinary-color);
+  transition: all 0.5s;
+
+  h2 {
+    font-size: 1.2rem;
+    padding: 0;
+    margin: 0;
+    color: var(--quaternary-color);
+    transition: all 0.5s;
+    letter-spacing: 0.1rem;
+    margin-top: 0.3rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+    color: var(--tertiary-color);
+    font-weight: 500;
+    margin-left: 1rem;
+    transition: all 0.5s;
+  }
+}
+
+.nftWrapper {
+  max-height: 315px;
+  min-height: 285px;
+  width: 100%;
+  border-top-right-radius: 1rem;
+  border-top-left-radius: 1rem;
+  overflow: hidden;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 285px;
+    min-width: 100%;
+    height: auto;
+    border-top-right-radius: 1rem;
+    border-top-left-radius: 1rem;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+
+    &:hover {
+      cursor: pointer;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.nft {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: auto;
+  border-top-right-radius: 1rem;
+  border-top-left-radius: 1rem;
+  object-fit: cover;
+  transition: transform 0.3s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+  }
+}

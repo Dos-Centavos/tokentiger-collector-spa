@@ -99,7 +99,7 @@ export const getSharableCollectionData = async ({ userId, publicId }) => {
     const response = result.data // await data.json()
     return response
   } catch (e) {
-    console.warn('Error in user/createUser()', e.message)
+    console.warn('Error in user/getSharableCollectionData()', e.message)
     throw e
   }
 }

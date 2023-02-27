@@ -17,6 +17,7 @@ import {
 } from 'react-router-dom'
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './index.css'
 
 ReactDOM.render(
   <>
@@ -25,10 +26,8 @@ ReactDOM.render(
       <QueryParamProvider adapter={ReactRouter6Adapter}>
 
         <Routes>
-          <Route path='/users/share/nft/' element={<App />} />
-
+          <Route path='/users/share/nft/:userId/:publicId' element={<App />} />
         </Routes>
-
         <ToastContainer
           position='top-right'
           autoClose={1500}

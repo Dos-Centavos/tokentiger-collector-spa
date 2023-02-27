@@ -28,7 +28,7 @@ const LoginForm = ({ callback }) => {
           toast.success('Login Success!')
           setLoading(false)
           callback()
-        }, 1000)
+        }, 1500)
       } catch (error) {
         values.isCreateBtn = false
         setSubmitting(false)

@@ -1,0 +1,143 @@
+@import url("https://fonts.googleapis.com/css2?family=Russo+One&display=swap");
+.container {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  width: 100%;
+  height: 120px;
+}
+
+.logoText {
+  margin-left: 7rem;
+  color: #3b9f6f;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  font-family: "Russo One", sans-serif;
+  width: 40%;
+  cursor: pointer;
+}
+
+.tm {
+  font-size: 0.5em;
+  font-weight: 200;
+}
+
+.bar {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 50%;
+  margin: 0 auto;
+}
+.navigation {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.5rem 0rem;
+}
+
+.navigationMenu {
+  margin-left: 0 auto;
+
+  ul {
+    display: flex;
+    padding: 0;
+  }
+
+  li {
+    list-style-type: none;
+    margin: 0 1rem;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    color: #3b9f6f;
+    font-size: 1.1rem;
+    font-weight: 590;
+    transition: ease-in-out background-color 250ms, ease-in-out color 250ms;
+
+    &:hover {
+      cursor: pointer;
+      color: var(--secondary-color);
+    }
+  }
+}
+
+.hamburger {
+  border: 0;
+  height: 40px;
+  width: 40px;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: #3b9f6f;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  position: absolute;
+  top: 50%;
+  right: 25px;
+  transform: translateY(-50%);
+  display: none;
+}
+.hamburger:hover {
+  background-color: #21bd72;
+}
+
+@media screen and (max-width: 1024px) {
+  .hamburger {
+    display: block;
+  }
+  .navigationMenu ul {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .logoText {
+    margin-left: 1rem;
+    font-size: 1.3rem;
+    width: 80%;
+  }
+  .hamburger {
+    height: 22px;
+    width: 22px;
+  }
+  .navigationMenu ul {
+    position: absolute;
+    top: 37px;
+    left: 0;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100vh - 77px);
+    background-color: rgb(12, 12, 12);
+    border-top: 1px solid black;
+    z-index: 9999;
+  }
+  .navigationMenu li {
+    text-align: center;
+    margin: 0;
+  }
+  .navigationMenu li a {
+    color: #3b9f6f;
+    width: 100%;
+    padding: 1.5rem 0;
+    font-size: 1rem;
+  }
+  .navigationMenu li:hover {
+    background-color: #3b9f6f56;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .navigationMenu.expanded ul {
+    display: block;
+  }
+}
