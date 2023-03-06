@@ -4,14 +4,18 @@
 
 // Global npm libraries
 import React from 'react'
-import { Container, Row, Col, Form, Button, Spinner, Card } from 'react-bootstrap'
+import { Container, Spinner, Card } from 'react-bootstrap'
 import { SlpMutableData } from 'slp-mutable-data'
 import Jdenticon from '@chris.troutner/react-jdenticon'
 import RetryQueue from '@chris.troutner/retry-queue'
 import { useQueryParam, StringParam } from 'use-query-params'
+import SharedTokenCard from '../token-tiger/sharedTokenCard'
+import PropagateLoader from 'react-spinners/PropagateLoader'
 
+// Styles
+import getNftStyles from './styles/index.module.scss'
 // Local libraries
-import TokenCard from './token-card.js'
+// import TokenCard from './token-card.js'
 import DemoFilter from './demo.js'
 
 let targetBchAddr = ''
@@ -27,7 +31,8 @@ class GetNfts extends React.Component {
       textInput: '',
       wallet: props.wallet,
       tokens: [],
-      iconsAreLoaded: true
+      iconsAreLoaded: true,
+      tokensFetched: false
     }
 
     // Encapsulate dependencies
@@ -48,7 +53,9 @@ class GetNfts extends React.Component {
 
   async componentDidMount () {
     console.log('targetBchAddr: ', targetBchAddr)
-
+    if (!targetBchAddr && this.props.targetBchAddr) {
+      targetBchAddr = this.props.targetBchAddr
+    }
     if (targetBchAddr.includes('bitcoincash:')) {
       await this.setState({ textInput: targetBchAddr })
 
@@ -60,54 +67,39 @@ class GetNfts extends React.Component {
   }
 
   render () {
-    const tokenCards = this.generateCards()
-
     return (
 
       <>
         <GetRestUrl />
-        <Container>
-          <Row>
-            <Col className='text-break' style={{ textAlign: 'center' }}>
-              <Form>
-                <Form.Group className='mb-3' controlId='formBasicEmail'>
-                  <Form.Label>Enter a BCH address to retrieve the NFTs it holds.</Form.Label>
-                  <Form.Control type='text' placeholder='bitcoincash:qqlrzp23w08434twmvr4fxw672whkjy0py26r63g3d' onChange={e => this.setState({ textInput: e.target.value })} />
-                </Form.Group>
-
-                <Button variant='primary' onClick={this.handleGetTokens}>
-                  Get NFT Collection
-                </Button>
-              </Form>
-            </Col>
-          </Row>
-          <br />
-          <Row>
-            <Col style={{ textAlign: 'center' }}>
-              {this.state.balance}
-            </Col>
-          </Row>
-          <br />
-
-          <Row>
-            <Col xs={8} />
-            <Col xs={4} style={{ textAlign: 'right' }}>
-              {
-                this.state.iconsAreLoaded
-                  ? null
-                  : (<Button variant='secondary'>Loading Token Data <Spinner animation='border' /></Button>)
-              }
-            </Col>
-          </Row>
-
-          {tokenCards}
+        <Container style={{ textAlign: 'center' }}>
+          {/*    {this.state.tokens.length && tokenCards} */}
+          {!this.state.tokensFetched && (
+            <PropagateLoader
+              color='#ffffff'
+              loading={!this.state.tokensFetched}
+              size={5}
+              cssOverride={{ position: 'absolute', top: '50%', left: '47%' }}
+              speedMultiplier={1}
+            />
+          )}
+          {this.state.tokensFetched && this.state.tokens.length > 0 && (
+            <div className={getNftStyles.container}>
+              <h1>Shared Collection</h1>
+              <div className={getNftStyles.tokensGrid}>
+                {this.state.tokens.map((val, i) => {
+                  return <SharedTokenCard key={`shared-${i}`} token={val} />
+                })}
+              </div>
+            </div>
+          )}
+          {this.state.tokens.length === 0 && this.state.tokensFetched && <h3>Shared tokens not found!</h3>}
 
         </Container>
       </>
     )
   }
 
-  generateCards () {
+  /*   generateCards() {
     const tokens = this.state.tokens
 
     // const tokenCards = []
@@ -175,7 +167,7 @@ class GetNfts extends React.Component {
     }
 
     return allCategories
-  }
+  } */
 
   async handleGetTokens (event) {
     try {
@@ -192,15 +184,15 @@ class GetNfts extends React.Component {
       })
 
       let tokens = await this.state.wallet.listTokens(textInput)
-      // console.log(`tokens: ${JSON.stringify(tokens, null, 2)}`)
+      console.log(`tokens: ${JSON.stringify(tokens, null, 2)}`)
 
       // If this is the demo address, then filter out any unexpected tokens.
       tokens = this.demoFilter.filterDemoTokens(textInput, tokens)
-      // console.log(`tokens after demoFilter: ${JSON.stringify(tokens, null, 2)}`)
+      console.log(`tokens after demoFilter: ${JSON.stringify(tokens, null, 2)}`)
 
       // Filter out any tokens that do not meet requirements to be NFTs.
       const nftCandidates = tokens.filter(x => x.qty === 1 && x.decimals === 0)
-      // console.log(`nftCandidates: ${JSON.stringify(nftCandidates, null, 2)}`)
+      console.log(`nftCandidates: ${JSON.stringify(nftCandidates, null, 2)}`)
 
       // Add the JDenticon icon
       nftCandidates.map((x) => {
@@ -218,10 +210,12 @@ class GetNfts extends React.Component {
         // balance: `Balance: ${balance} sats, ${bchBalance} BCH`,
         balance: '',
         tokens: nftCandidates,
-        iconsAreLoaded: false
+        iconsAreLoaded: false,
+        tokensFetched: true
       })
     } catch (err) {
       this.setState({
+        tokensFetched: true,
         balance: (<p><b>Error</b>: {`${err.message}`}</p>)
       })
     }
@@ -257,7 +251,7 @@ class GetNfts extends React.Component {
 
       const category = await this.categorizeToken(token)
       if (category === 'fungible') {
-      // nfts.push(thisToken)
+        // nfts.push(thisToken)
         console.log(`Ignoring fungible token ${token.ticker} (${token.tokenId})`)
 
         // ToDo: Delete this token from the this.state.tokens array.
@@ -281,12 +275,12 @@ class GetNfts extends React.Component {
         // Be default, link to the token icon.
         let newIcon = (
           <a href={tokenIcon} target='_blank' rel='noreferrer'>
-            <Card.Img src={tokenIcon} style={{ width: '200px' }} />
+            <Card.Img src={tokenIcon} style={{ width: '200px' }} alt='Token Icon Not Found!' />
           </a>
         )
 
         // If the fullSizedUrl is specified, link to that.
-        const fullSizedUrl = token.tokenData.mutableData.fullSizedUrl
+        const fullSizedUrl = token.tokenData.mutableData ? token.tokenData.mutableData.fullSizedUrl : null
         if (fullSizedUrl) {
           newIcon = (
             <a href={fullSizedUrl} target='_blank' rel='noreferrer'>
@@ -299,7 +293,7 @@ class GetNfts extends React.Component {
       }
 
       // Extract the category from the mutable data, if it exists.
-      if (token.tokenData.mutableData.category) {
+      if (token.tokenData.mutableData && token.tokenData.mutableData.category) {
         token.category = this.capitalizeFirstLetter(token.tokenData.mutableData.category)
       }
 

@@ -9,15 +9,26 @@ import { useQueryParam, StringParam } from 'use-query-params'
 // Local libraries
 import './App.css'
 import LoadScripts from './components/load-scripts'
-import WaitingModal from './components/waiting-modal'
+// import WaitingModal from './components/waiting-modal'
 import AsyncLoad from './services/async-load'
-import SelectServerButton from './components/servers/select-server-button'
-import Footer from './components/footer'
-import NavMenu from './components/nav-menu'
+// import SelectServerButton from './components/servers/select-server-button'
+import Footer from './components/token-tiger/footer'
+import Header from './components/token-tiger/header'
 import AppBody from './components/app-body'
+import { isLoggedIn, verifyTokenExpiration, logout } from './services/token-tiger/auth'
+import { getSharableCollectionData } from './services/token-tiger/users'
 
+import LoginForm from './pages/login'
+import PropagateLoader from 'react-spinners/PropagateLoader'
+
+import {
+  useParams
+} from 'react-router-dom'
 // Default restURL for a back-end server.
 let serverUrl = 'https://free-bch.fullstack.cash'
+
+let userIdParam = ''
+let publicIdParam = ''
 
 // Default alternative servers.
 const defaultServerOptions = [
@@ -29,7 +40,7 @@ const defaultServerOptions = [
 
 let _this
 
-class App extends React.Component {
+class Shared extends React.Component {
   constructor (props) {
     super(props)
 
@@ -47,7 +58,10 @@ class App extends React.Component {
       asyncInitFinished: false, // Did startup finish?
       asyncInitSucceeded: null, // Did startup finish successfully?
       modalBody: [], // Strings displayed in the modal
-      hideSpinner: false // Spinner gif in modal
+      hideSpinner: false, // Spinner gif in modal,
+      isAuth: null,
+      targetBchAddr: null,
+      errMsg: null
     }
 
     this.cnt = 0
@@ -56,41 +70,54 @@ class App extends React.Component {
   }
 
   async componentDidMount () {
+    await _this.startAsyncFunctions()
+  }
+
+  async startAsyncFunctions () {
     try {
-      this.addToModal('Loading minimal-slp-wallet')
+      if (!userIdParam || !publicIdParam) {
+        throw new Error('Wrong Link!!')
+      }
 
-      await this.asyncLoad.loadWalletLib()
+      const isAuth = await _this.handleAuth()
 
-      this.addToModal('Getting alternative servers')
-      const servers = await this.asyncLoad.getServers()
+      if (!isAuth) {
+        // Wait for login
+        // this functions is called again after login
+        return
+      }
+      // _this.addToModal('Loading minimal-slp-wallet')
+
+      await _this.asyncLoad.loadWalletLib()
+
+      // _this.addToModal('Getting alternative servers')
+      const servers = await _this.asyncLoad.getServers()
       // console.log('servers: ', servers)
 
-      this.addToModal('Initializing wallet')
+      // _this.addToModal('Initializing wallet')
       // console.log(`Initializing wallet with back end server ${serverUrl}`)
 
-      const wallet = await this.asyncLoad.initWallet(serverUrl)
+      const wallet = await _this.asyncLoad.initWallet(serverUrl)
 
-      this.setState({
+      // _this.addToModal('Fetching NFT Collection')
+
+      await _this.fetchAddr(userIdParam, publicIdParam)
+
+      _this.setState({
         wallet,
         serverUrl,
-        // queryParamExists,
         servers,
-        showStartModal: false,
         asyncInitFinished: true,
         asyncInitSucceeded: true
       })
     } catch (err) {
-      this.modalBody = [
-        `Error: ${err.message}`,
-        'Try selecting a different back end server using the drop-down menu at the bottom of the app.'
-      ]
+      console.warn(err)
 
-      this.setState({
-        modalBody: this.modalBody,
+      _this.setState({
         hideSpinner: true,
-        showStartModal: true,
         asyncInitFinished: true,
-        asyncInitSucceeded: false
+        asyncInitSucceeded: false,
+        errMsg: `${err.message}`
       })
     }
   }
@@ -109,23 +136,32 @@ class App extends React.Component {
 
     return (
       <>
+        {(!userIdParam || !publicIdParam) && <GetParams />}
         <GetRestUrl />
         <LoadScripts />
-        <NavMenu menuHandler={this.onMenuClick} />
+        {this.state.isAuth === true &&
+          <>
+            <Header />
 
-        {
-          this.state.showStartModal
-            ? <UninitializedView
-                modalBody={this.state.modalBody}
-                hideSpinner={this.state.hideSpinner}
-                appData={appData}
-                denyClose={this.state.showStartModal}
+            {!this.state.asyncInitSucceeded && !this.state.errMsg && (
+              <PropagateLoader
+                color='#ffffff'
+                loading={!this.state.asyncInitSucceeded}
+                size={5}
+                cssOverride={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                speedMultiplier={1}
               />
-            : <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} />
-        }
+            )}
+            {this.state.asyncInitSucceeded && !this.state.errMsg && (
+              <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetBchAddr={this.state.targetBchAddr} />
+            )}
 
-        <SelectServerButton menuHandler={this.onMenuClick} />
-        <Footer appData={appData} />
+            {this.state.errMsg && <div style={{ textAlign: 'center' }}><h3>{this.state.errMsg}</h3></div>}
+
+          </>}
+
+        {this.state.isAuth === false && <LoginForm callback={_this.startAsyncFunctions} />}
+        <Footer />
       </>
     )
   }
@@ -151,41 +187,72 @@ class App extends React.Component {
       menuState
     })
   }
-}
 
-// This is rendered *before* the BCH wallet is initialized.
-function UninitializedView (props) {
-  // console.log('UninitializedView props: ', props)
-
-  const heading = 'Loading Blockchain Data...'
-
-  return (
-    <>
-      <WaitingModal
-        heading={heading}
-        body={props.modalBody}
-        hideSpinner={props.hideSpinner}
-        denyClose={props.denyClose}
-      />
-
-      {
-        _this.state.asyncInitFinished
-          ? <AppBody menuState={100} wallet={props.wallet} appData={props.appData} />
-          : null
+  // Get bch address by user and public ID
+  async fetchAddr (userId, publicId) {
+    try {
+      const result = await getSharableCollectionData({ userId, publicId })
+      _this.setState({ targetBchAddr: result.bchAddress })
+    } catch (err) {
+      if (err.message) {
+        throw err
       }
-    </>
-  )
+      throw new Error('Address not found!')
+    }
+  }
+
+  async handleAuth () {
+    try {
+      let isAuth = isLoggedIn()
+      if (isAuth) {
+        // verify jwt expiration
+        const remainingHours = await verifyTokenExpiration()
+        if (remainingHours < 1) {
+          isAuth = false
+          logout()
+        }
+      }
+
+      _this.setState({
+        isAuth
+      })
+      return isAuth
+    } catch (error) {
+      return false
+    }
+  }
 }
+
+/// / This is rendered *before* the BCH wallet is initialized.
+// function UninitializedView(props) {
+//  // console.log('UninitializedView props: ', props)
+//
+//  const heading = 'Loading Blockchain Data...'
+//
+//  return (
+//    <>
+//      <WaitingModal
+//        heading={heading}
+//        body={props.modalBody}
+//        hideSpinner={props.hideSpinner}
+//        denyClose={props.denyClose}
+//      />
+//
+//      {
+//        _this.state.asyncInitFinished
+//          ? <AppBody menuState={100} wallet={props.wallet} appData={props.appData} />
+//          : null
+//      }
+//    </>
+//  )
+// }
 
 // This is rendered *after* the BCH wallet is initialized.
 function InitializedView (props) {
-  // console.log(`InitializedView props.menuState: ${props.menuState}`)
-  // console.log(`InitializedView _this.state.menuState: ${_this.state.menuState}`)
-
   return (
     <>
       <br />
-      <AppBody menuState={_this.state.menuState} wallet={props.wallet} appData={props.appData} />
+      <AppBody menuState={_this.state.menuState} wallet={props.wallet} appData={props.appData} targetBchAddr={props.targetBchAddr} />
     </>
   )
 }
@@ -202,5 +269,14 @@ function GetRestUrl (props) {
 
   return (<></>)
 }
+// Get the userId and publicId parameters.
+// example : /users/share/nft/63e43cbbf7ac232816b6cf25/41846499994000031506204303818752
+function GetParams () {
+  const params = useParams()
+  userIdParam = params.userId
+  publicIdParam = params.publicId
 
-export default App
+  return (<></>)
+}
+
+export default Shared
