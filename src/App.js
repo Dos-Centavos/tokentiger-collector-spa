@@ -15,7 +15,6 @@ import AsyncLoad from './services/async-load'
 import Footer from './components/token-tiger/footer'
 import Header from './components/token-tiger/header'
 import AppBody from './components/app-body'
-import { isLoggedIn, verifyTokenExpiration, logout } from './services/token-tiger/auth'
 import { getSharableCollectionData } from './services/token-tiger/users'
 
 import LoginForm from './pages/login'
@@ -59,7 +58,6 @@ class Shared extends React.Component {
       asyncInitSucceeded: null, // Did startup finish successfully?
       modalBody: [], // Strings displayed in the modal
       hideSpinner: false, // Spinner gif in modal,
-      isAuth: null,
       targetBchAddr: null,
       errMsg: null
     }
@@ -77,14 +75,6 @@ class Shared extends React.Component {
     try {
       if (!userIdParam || !publicIdParam) {
         throw new Error('Wrong Link!!')
-      }
-
-      const isAuth = await _this.handleAuth()
-
-      if (!isAuth) {
-        // Wait for login
-        // this functions is called again after login
-        return
       }
       // _this.addToModal('Loading minimal-slp-wallet')
 
@@ -139,26 +129,26 @@ class Shared extends React.Component {
         {(!userIdParam || !publicIdParam) && <GetParams />}
         <GetRestUrl />
         <LoadScripts />
-        {this.state.isAuth === true &&
-          <>
-            <Header />
 
-            {!this.state.asyncInitSucceeded && !this.state.errMsg && (
-              <PropagateLoader
-                color='#ffffff'
-                loading={!this.state.asyncInitSucceeded}
-                size={5}
-                cssOverride={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-                speedMultiplier={1}
-              />
-            )}
-            {this.state.asyncInitSucceeded && !this.state.errMsg && (
-              <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetBchAddr={this.state.targetBchAddr} />
-            )}
+        <>
+          <Header />
 
-            {this.state.errMsg && <div style={{ textAlign: 'center' }}><h3>{this.state.errMsg}</h3></div>}
+          {!this.state.asyncInitSucceeded && !this.state.errMsg && (
+            <PropagateLoader
+              color='#ffffff'
+              loading={!this.state.asyncInitSucceeded}
+              size={5}
+              cssOverride={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+              speedMultiplier={1}
+            />
+          )}
+          {this.state.asyncInitSucceeded && !this.state.errMsg && (
+            <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetBchAddr={this.state.targetBchAddr} />
+          )}
 
-          </>}
+          {this.state.errMsg && <div style={{ textAlign: 'center' }}><h3>{this.state.errMsg}</h3></div>}
+
+        </>
 
         {this.state.isAuth === false && <LoginForm callback={_this.startAsyncFunctions} />}
         <Footer />
@@ -198,27 +188,6 @@ class Shared extends React.Component {
         throw err
       }
       throw new Error('Address not found!')
-    }
-  }
-
-  async handleAuth () {
-    try {
-      let isAuth = isLoggedIn()
-      if (isAuth) {
-        // verify jwt expiration
-        const remainingHours = await verifyTokenExpiration()
-        if (remainingHours < 1) {
-          isAuth = false
-          logout()
-        }
-      }
-
-      _this.setState({
-        isAuth
-      })
-      return isAuth
-    } catch (error) {
-      return false
     }
   }
 }
