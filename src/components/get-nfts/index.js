@@ -11,6 +11,7 @@ import RetryQueue from '@chris.troutner/retry-queue'
 import { useQueryParam, StringParam } from 'use-query-params'
 import SharedTokenCard from '../token-tiger/sharedTokenCard'
 import PropagateLoader from 'react-spinners/PropagateLoader'
+import axios from 'axios'
 
 // Styles
 import getNftStyles from './styles/index.module.scss'
@@ -244,9 +245,15 @@ class GetNfts extends React.Component {
     try {
       // Get token data for this token.
       const wallet = this.state.wallet
-      const tokenData = await wallet.getTokenData2(token.tokenId)
+      const tokenData = await wallet.getTokenData(token.tokenId, true)
       console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
+      // Get mutable data for this token
+      const mutableDataObj = await fetchIpfs(tokenData.mutableData)
+      console.log(`mutableDataObj: ${JSON.stringify(mutableDataObj, null, 2)}`)
+
+      // Set token icon url into token data
+      tokenData.tokenIcon = mutableDataObj.tokenIcon
       token.tokenData = tokenData
 
       const category = await this.categorizeToken(token)
@@ -355,15 +362,15 @@ class GetNfts extends React.Component {
       // const tokenData = await this.adapters.wallet.bchWallet.getTokenData(tokenId)
       // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
-      if (tokenData.tokenStats.type === 65) {
+      if (tokenData.genesisData.type === 65) {
         return 'nft'
       }
 
       // Create a set of checks to detect a simple NFT
-      const isType1 = tokenData.tokenStats.type === 1
-      const hasNoMintingBaton = !tokenData.tokenStats.mintBatonIsActive
-      const hasNoDecimals = !tokenData.tokenStats.decimals
-      const hasQtyOfOne = parseInt(tokenData.tokenStats.tokensInCirculationStr) === 1
+      const isType1 = tokenData.genesisData.type === 1
+      const hasNoMintingBaton = !tokenData.genesisData.mintBatonIsActive
+      const hasNoDecimals = !tokenData.genesisData.decimals
+      const hasQtyOfOne = parseInt(tokenData.genesisData.tokensInCirculationStr) === 1
       // console.log(`isType1: ${isType1}, hasNoMintingBaton: ${hasNoMintingBaton}, hasNoDecimals: ${hasNoDecimals}, hasQtyOfOne: ${hasQtyOfOne}`)
 
       if (isType1 && hasNoMintingBaton && hasNoDecimals && hasQtyOfOne) {
@@ -372,7 +379,7 @@ class GetNfts extends React.Component {
 
       if (isType1) return 'fungible'
 
-      throw new Error(`Unknown token type: ${tokenData.tokenStats.type}`)
+      throw new Error(`Unknown token type: ${tokenData.genesisData.type}`)
     } catch (err) {
       console.error('Error in categorizeToken(): ', err)
       throw err
@@ -405,4 +412,32 @@ function GetRestUrl (props) {
   return (<></>)
 }
 
+// Fetch ipfs json data
+const fetchIpfs = async (url) => {
+  try {
+    const parsedURL = parseURL(url)
+    const options = {
+      method: 'GET',
+      url: parsedURL,
+      headers: {
+        Accept: 'application/json'
+      }
+    }
+    const result = await axios(options)
+    const response = result.data
+    return response
+  } catch (e) {
+    console.warn('Error in get-nfts/index/fetchIpfs()', e.message)
+    throw e
+  }
+}
+
+// Get gateway url for fetch
+const parseURL = (url) => {
+  // Get CID from ipfs url
+  const urlSplit = url.split('ipfs://')
+  // Build url
+  const gatewayURL = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/${urlSplit[1]}/data.json`
+  return gatewayURL
+}
 export default GetNfts
