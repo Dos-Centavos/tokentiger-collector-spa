@@ -437,7 +437,7 @@ const parseURL = (url) => {
   // Get CID from ipfs url
   const urlSplit = url.split('ipfs://')
   // Build url
-  const gatewayURL = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/${urlSplit[1]}/data.json`
+  const gatewayURL = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${urlSplit[1]}/data.json`
   return gatewayURL
 }
 export default GetNfts
