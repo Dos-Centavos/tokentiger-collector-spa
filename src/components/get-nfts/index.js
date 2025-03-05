@@ -245,11 +245,22 @@ class GetNfts extends React.Component {
     try {
       // Get token data for this token.
       const wallet = this.state.wallet
+
+      const slpMutableData = new SlpMutableData({
+        wallet,
+        cidUrlType: 1,
+        ipfsGatewayUrl: 'files.tokentiger.com'
+      })
+
       const tokenData = await wallet.getTokenData(token.tokenId, true)
       console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
+      // Get last mutable data CID
+      const { mutableCid } = await slpMutableData.get.dataCids(token.tokenId)
+      console.log('mutableCid : ', mutableCid)
+
       // Get mutable data for this token
-      const mutableDataObj = await fetchIpfs(tokenData.mutableData)
+      const mutableDataObj = await fetchIpfs(mutableCid)
       console.log(`mutableDataObj: ${JSON.stringify(mutableDataObj, null, 2)}`)
 
       // Set token icon url into token data
@@ -435,9 +446,13 @@ const fetchIpfs = async (url) => {
 // Get gateway url for fetch
 const parseURL = (url) => {
   // Get CID from ipfs url
+  let cid = url
   const urlSplit = url.split('ipfs://')
+  // If can be splited , get last string from it  and set as cid
+  if (urlSplit[1]) cid = urlSplit[1]
+
   // Build url
-  const gatewayURL = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${urlSplit[1]}/data.json`
+  const gatewayURL = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${cid}/data.json`
   return gatewayURL
 }
 export default GetNfts
