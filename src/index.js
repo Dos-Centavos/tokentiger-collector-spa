@@ -2,7 +2,7 @@
 */
 
 import React from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 import App from './App'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
@@ -18,13 +18,13 @@ import {
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
+const root = ReactDOM.createRoot(document.getElementById('root'))
 
-ReactDOM.render(
+root.render(
   <>
 
     <BrowserRouter>
       <QueryParamProvider adapter={ReactRouter6Adapter}>
-
         <Routes>
           <Route path='/users/share/nft/:userId/:publicId' element={<App />} />
         </Routes>
@@ -41,7 +41,7 @@ ReactDOM.render(
     </BrowserRouter>
 
   </>
-  , document.getElementById('root'))
+)
 
 // Updating to React v18
 // https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html#updates-to-client-rendering-apis
