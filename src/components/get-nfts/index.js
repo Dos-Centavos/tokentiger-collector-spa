@@ -290,22 +290,25 @@ class GetNfts extends React.Component {
         const tokenIcon = tokenData.tokenIcon
         console.log(`tokenIcon: ${tokenIcon}`)
 
+        let tokenFileLink = tokenIcon
+
+        const fullSizedUrl = token.tokenData.mutableData ? token.tokenData.mutableData.fullSizedUrl : null
+
+        // If the fullSizedUrl is specified, link to that.
+        if (fullSizedUrl) {
+          tokenFileLink = fullSizedUrl
+        }
+        // If the payloacCid is specified, link to that.
+        if (mutableDataObj.payloadCid) {
+          tokenFileLink = `${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${mutableDataObj.payloadCid}`
+        }
+
         // Be default, link to the token icon.
-        let newIcon = (
-          <a href={tokenIcon} target='_blank' rel='noreferrer'>
+        const newIcon = (
+          <a href={tokenFileLink} target='_blank' rel='noreferrer'>
             <Card.Img src={tokenIcon} style={{ width: '200px' }} alt='Token Icon Not Found!' />
           </a>
         )
-
-        // If the fullSizedUrl is specified, link to that.
-        const fullSizedUrl = token.tokenData.mutableData ? token.tokenData.mutableData.fullSizedUrl : null
-        if (fullSizedUrl) {
-          newIcon = (
-            <a href={fullSizedUrl} target='_blank' rel='noreferrer'>
-              <Card.Img src={tokenIcon} style={{ width: '200px' }} />
-            </a>
-          )
-        }
 
         token.icon = newIcon
       }
