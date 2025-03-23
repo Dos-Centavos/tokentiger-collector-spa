@@ -5,11 +5,22 @@ import { PropagateLoader } from 'react-spinners'
 
 export default function SharedTokenCard (props) {
   const { token } = props
+
+  const handleIconClick = () => {
+    const { tokenData } = token
+    if (tokenData && tokenData.payloadCid) {
+      window.open(`${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${tokenData.payloadCid}`, '__blank')
+    }
+  }
   return (
 
     <div className={sharedTStyles.container}>
       <div className={sharedTStyles.nftWrapper}>
-        {!token.iconNeedsDownload && token.icon}
+        {!token.iconNeedsDownload && (
+          <div onClick={handleIconClick}>
+            {token.icon}
+          </div>
+        )}
         {token.iconNeedsDownload && (
           <PropagateLoader
             color='#ffffff'
