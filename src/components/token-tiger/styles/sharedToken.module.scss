@@ -7,6 +7,9 @@
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.25);
   background-color: var(--quinary-color);
   transition: all 0.5s;
+  position: relative;
+  border: 1px solid;
+  padding: 20px;
 
   h2 {
     font-size: 1.2rem;
@@ -25,6 +28,35 @@
     margin-left: 1rem;
     transition: all 0.5s;
   }
+}
+
+.publicNft {
+  border-color: #4CAF50;
+}
+
+.privateNft {
+  border-color: #FF9800;
+}
+
+.nftTag {
+  position: absolute;
+  top: -12px;
+  right: 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  background-color: white;
+}
+
+.publicNft .nftTag {
+  color: #4CAF50;
+  border: 2.5px solid #4CAF50;
+}
+
+.privateNft .nftTag {
+  color: #FF9800;
+  border: 2.5px solid #FF9800;
 }
 
 .nftWrapper {
