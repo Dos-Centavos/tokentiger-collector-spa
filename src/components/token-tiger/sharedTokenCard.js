@@ -1,23 +1,31 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import sharedTStyles from './styles/sharedToken.module.scss'
 import { PropagateLoader } from 'react-spinners'
 
 export default function SharedTokenCard (props) {
   const { token } = props
+  const [isPublic, setIsPublic] = useState(false)
 
-  const handleIconClick = () => {
-    const { tokenData } = token
-    if (tokenData && tokenData.payloadCid) {
-      window.open(`${process.env.REACT_APP_IPFS_GATEWAY}/ipfs/view/${tokenData.payloadCid}`, '__blank')
+  // Get NFT tag.
+  useEffect(() => {
+    if (!token.tokenData) {
+      return
     }
-  }
-  return (
+    setIsPublic(token.tokenData.payloadCid)
+  }, [token.tokenData])
 
-    <div className={sharedTStyles.container}>
+  return (
+    <div className={`${sharedTStyles.container} ${isPublic ? sharedTStyles.publicNft : sharedTStyles.privateNft}`}>
+      {/** show tag when the icons is success downloaded */}
+      {!token.iconNeedsDownload && (
+        <div className={sharedTStyles.nftTag}>
+          {isPublic ? 'Public NFT' : 'Private NFT'}
+        </div>
+      )}
       <div className={sharedTStyles.nftWrapper}>
         {!token.iconNeedsDownload && (
-          <div onClick={handleIconClick}>
+          <div>
             {token.icon}
           </div>
         )}
@@ -30,11 +38,8 @@ export default function SharedTokenCard (props) {
             speedMultiplier={1}
           />
         )}
-        {/*   <img className={sharedTStyles.nft} src={} alt='nft example' /> */}
       </div>
       <h2>{token.name}</h2>
-      {/*  <h3>NFT Name</h3> */}
     </div>
-
   )
 }
