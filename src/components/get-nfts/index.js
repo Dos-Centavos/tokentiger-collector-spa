@@ -265,6 +265,7 @@ class GetNfts extends React.Component {
 
       // Set token icon url into token data
       tokenData.tokenIcon = mutableDataObj.tokenIcon
+      tokenData.payloadCid = mutableDataObj.payloadCid
       token.tokenData = tokenData
 
       const category = await this.categorizeToken(token)
