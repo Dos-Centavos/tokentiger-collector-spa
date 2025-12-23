@@ -24,7 +24,7 @@ import {
   useParams
 } from 'react-router-dom'
 // Default restURL for a back-end server.
-let serverUrl = 'https://free-bch.fullstack.cash'
+let serverUrl = process.env.REACT_APP_BCH_REST_URL || 'https://free-bch.fullstack.cash'
 
 let userIdParam = ''
 let publicIdParam = ''

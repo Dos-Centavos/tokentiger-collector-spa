@@ -11,6 +11,7 @@ import RetryQueue from '@chris.troutner/retry-queue'
 import { useQueryParam, StringParam } from 'use-query-params'
 import SharedTokenCard from '../token-tiger/sharedTokenCard'
 import PropagateLoader from 'react-spinners/PropagateLoader'
+import { getTokenData } from '../../services/token-tiger/token.js'
 import axios from 'axios'
 
 // Styles
@@ -243,24 +244,16 @@ class GetNfts extends React.Component {
   // data for a token, then updates the icon with the URL from the mutable data.
   async updateToken (token) {
     try {
-      // Get token data for this token.
-      const wallet = this.state.wallet
-
-      const slpMutableData = new SlpMutableData({
-        wallet,
-        cidUrlType: 1,
-        ipfsGatewayUrl: 'files.tokentiger.com'
-      })
-
-      const tokenData = await wallet.getTokenData(token.tokenId, true)
+      const tokenDataRes = await getTokenData([token.tokenId])
+      const tokenData = tokenDataRes.result[0]
       console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
       // Get last mutable data CID
-      const { mutableCid } = await slpMutableData.get.dataCids(token.tokenId)
-      console.log('mutableCid : ', mutableCid)
+      // const { mutableCid } = await slpMutableData.get.dataCids(token.tokenId)
+      // console.log('mutableCid : ', mutableCid)
 
       // Get mutable data for this token
-      const mutableDataObj = await fetchIpfs(mutableCid)
+      const mutableDataObj = await fetchIpfs(tokenData.mutableData)
       console.log(`mutableDataObj: ${JSON.stringify(mutableDataObj, null, 2)}`)
 
       // Set token icon url into token data
@@ -377,7 +370,7 @@ class GetNfts extends React.Component {
       // const tokenData = await this.adapters.wallet.bchWallet.getTokenData(tokenId)
       // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
-      if (tokenData.genesisData.type === 65) {
+      if (tokenData.genesisData?.type === 65) {
         return 'nft'
       }
 
