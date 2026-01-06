@@ -184,6 +184,10 @@ class Shared extends React.Component {
       const result = await getSharableCollectionData({ userId, publicId })
       _this.setState({ targetBchAddr: result.bchAddress })
     } catch (err) {
+      if (err?.response?.data?.match('revoked')) {
+        throw new Error('This Shareable Collection has been removed')
+      }
+      console.log(err.response.data)
       if (err.message) {
         throw err
       }
