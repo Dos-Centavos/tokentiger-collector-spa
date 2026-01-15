@@ -16,6 +16,7 @@ import Footer from './components/token-tiger/footer'
 import Header from './components/token-tiger/header'
 import AppBody from './components/app-body'
 import { getSharableCollectionData } from './services/token-tiger/users'
+import DeletedSharable from './components/token-tiger/deletedSharable'
 
 import LoginForm from './pages/login'
 import PropagateLoader from 'react-spinners/PropagateLoader'
@@ -146,7 +147,13 @@ class Shared extends React.Component {
             <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetBchAddr={this.state.targetBchAddr} />
           )}
 
-          {this.state.errMsg && <div style={{ textAlign: 'center' }}><h3>{this.state.errMsg}</h3></div>}
+          {this.state.errMsg && this.state.errMsg === 'This Shareable Collection has been removed' && (
+            <DeletedSharable />
+          )}
+
+          {this.state.errMsg && this.state.errMsg !== 'This Shareable Collection has been removed' && (
+            <div style={{ textAlign: 'center' }}><h3>{this.state.errMsg}</h3></div>
+          )}
 
         </>
 
