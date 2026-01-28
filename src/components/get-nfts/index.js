@@ -8,7 +8,7 @@ import { Container, Spinner, Card } from 'react-bootstrap'
 import { SlpMutableData } from 'slp-mutable-data'
 import Jdenticon from '@chris.troutner/react-jdenticon'
 import RetryQueue from '@chris.troutner/retry-queue'
-import { useQueryParam, StringParam } from 'use-query-params'
+// import { useQueryParam, StringParam } from 'use-query-params'
 import SharedTokenCard from '../token-tiger/sharedTokenCard'
 import PropagateLoader from 'react-spinners/PropagateLoader'
 import { getTokenData } from '../../services/token-tiger/token.js'
@@ -19,13 +19,15 @@ import getNftStyles from './styles/index.module.scss'
 // Local libraries
 // import TokenCard from './token-card.js'
 import DemoFilter from './demo.js'
+import MarkdownFormat from '../MarkdownFormat.js'
 
-let targetBchAddr = ''
+let targetData = ''
 
 // let _this
 
 class GetNfts extends React.Component {
   constructor (props) {
+    console.log('props', props)
     super(props)
 
     this.state = {
@@ -54,14 +56,14 @@ class GetNfts extends React.Component {
   }
 
   async componentDidMount () {
-    console.log('targetBchAddr: ', targetBchAddr)
-    if (!targetBchAddr && this.props.targetBchAddr) {
-      targetBchAddr = this.props.targetBchAddr
+    console.log('targetData ', targetData)
+    if (!targetData && this.props.targetData) {
+      targetData = this.props.targetData
     }
-    if (targetBchAddr.includes('bitcoincash:')) {
-      await this.setState({ textInput: targetBchAddr })
+    if (targetData?.bchAddress.includes('bitcoincash:')) {
+      await this.setState({ textInput: targetData.bchAddress })
 
-      console.log(`Starting handleGetTokens() with ${targetBchAddr}`)
+      console.log(`Starting handleGetTokens() with ${targetData.bchAddr}`)
 
       // Should I await?
       this.handleGetTokens()
@@ -72,7 +74,7 @@ class GetNfts extends React.Component {
     return (
 
       <>
-        <GetRestUrl />
+        {/* <GetRestUrl /> */}
         <Container style={{ textAlign: 'center' }}>
           {/*    {this.state.tokens.length && tokenCards} */}
           {!this.state.tokensFetched && (
@@ -86,7 +88,8 @@ class GetNfts extends React.Component {
           )}
           {this.state.tokensFetched && this.state.tokens.length > 0 && (
             <div className={getNftStyles.container}>
-              <h1>Shared Collection</h1>
+              <h1>{this.props.targetData?.collectionLabel || 'Shared Collection'}</h1>
+              {this.props.targetData?.about && <MarkdownFormat content={this.props.targetData.about} />}
               <div className={getNftStyles.tokensGrid}>
                 {this.state.tokens.map((val, i) => {
                   return <SharedTokenCard key={`shared-${i}`} token={val} />
@@ -408,7 +411,7 @@ class GetNfts extends React.Component {
 }
 
 // Get the restURL query parameter.
-function GetRestUrl (props) {
+/* function GetRestUrl (props) {
   const [bchAddr] = useQueryParam('addr', StringParam)
   // console.log('restURL: ', restURL)
 
@@ -418,7 +421,7 @@ function GetRestUrl (props) {
   }
 
   return (<></>)
-}
+} */
 
 // Fetch ipfs json data
 const fetchIpfs = async (url) => {

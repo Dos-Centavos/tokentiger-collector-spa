@@ -59,7 +59,7 @@ class Shared extends React.Component {
       asyncInitSucceeded: null, // Did startup finish successfully?
       modalBody: [], // Strings displayed in the modal
       hideSpinner: false, // Spinner gif in modal,
-      targetBchAddr: null,
+      targetData: null,
       errMsg: null
     }
 
@@ -144,7 +144,7 @@ class Shared extends React.Component {
             />
           )}
           {this.state.asyncInitSucceeded && !this.state.errMsg && (
-            <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetBchAddr={this.state.targetBchAddr} />
+            <InitializedView wallet={this.state.wallet} menuState={this.state.menuState} appData={appData} targetData={this.state.targetData} />
           )}
 
           {this.state.errMsg && this.state.errMsg === 'This Shareable Collection has been removed' && (
@@ -189,7 +189,8 @@ class Shared extends React.Component {
   async fetchAddr (userId, publicId) {
     try {
       const result = await getSharableCollectionData({ userId, publicId })
-      _this.setState({ targetBchAddr: result.bchAddress })
+      console.log('result', result)
+      _this.setState({ targetData: result })
     } catch (err) {
       if (err?.response?.data?.match('revoked')) {
         throw new Error('This Shareable Collection has been removed')
@@ -232,7 +233,7 @@ function InitializedView (props) {
   return (
     <>
       <br />
-      <AppBody menuState={_this.state.menuState} wallet={props.wallet} appData={props.appData} targetBchAddr={props.targetBchAddr} />
+      <AppBody menuState={_this.state.menuState} wallet={props.wallet} appData={props.appData} targetData={props.targetData} />
     </>
   )
 }
