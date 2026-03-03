@@ -21,11 +21,15 @@ import getNftStyles from './styles/index.module.scss'
 import DemoFilter from './demo.js'
 import MarkdownFormat from '../MarkdownFormat.js'
 
+import { GlobalContext } from '../../hooks/global-state.js'
+
 let targetData = ''
 
 // let _this
 
 class GetNfts extends React.Component {
+  static contextType = GlobalContext
+
   constructor (props) {
     console.log('props', props)
     super(props)
@@ -56,7 +60,6 @@ class GetNfts extends React.Component {
   }
 
   async componentDidMount () {
-    console.log('targetData ', targetData)
     if (!targetData && this.props.targetData) {
       targetData = this.props.targetData
     }
@@ -176,6 +179,18 @@ class GetNfts extends React.Component {
 
   async handleGetTokens (event) {
     try {
+      const { tokensCache } = this.context
+
+      const existingData = Object.keys(tokensCache).length
+      if (existingData) {
+        console.log('Loading data from global state')
+        this.setState({
+          tokens: Object.values(tokensCache),
+          iconsAreLoaded: true,
+          tokensFetched: true
+        })
+        return existingData
+      }
       const textInput = this.state.textInput
 
       console.log(`Getting NFTs for address ${textInput}`)
@@ -247,6 +262,8 @@ class GetNfts extends React.Component {
   // data for a token, then updates the icon with the URL from the mutable data.
   async updateToken (token) {
     try {
+      const { tokensCache } = this.context
+
       const tokenDataRes = await getTokenData([token.tokenId])
       const tokenData = tokenDataRes.result[0]
       console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
@@ -262,6 +279,7 @@ class GetNfts extends React.Component {
       // Set token icon url into token data
       tokenData.tokenIcon = mutableDataObj.tokenIcon
       tokenData.payloadCid = mutableDataObj.payloadCid
+      tokenData.mutableData = mutableDataObj
       token.tokenData = tokenData
 
       const category = await this.categorizeToken(token)
@@ -308,16 +326,63 @@ class GetNfts extends React.Component {
         )
 
         token.icon = newIcon
+        token.tokenIconUrl = tokenData.tokenIcon
       }
 
       // Extract the category from the mutable data, if it exists.
       if (token.tokenData.mutableData && token.tokenData.mutableData.category) {
         token.category = this.capitalizeFirstLetter(token.tokenData.mutableData.category)
       }
-
       // Signal that a token download has been attempted.
       token.iconNeedsDownload = false
 
+      let userDataMarkdown = 'No Info Available'
+      let media = null
+
+      try {
+        const mutableData = mutableDataObj
+        console.log('token.tokenData.mutableData', mutableData)
+
+        const userData = JSON.parse(mutableData.userData)
+        userDataMarkdown = userData.markdown || 'No Info Available'
+
+        // Extract media property from userData.media
+        // Media is an array of objects with {filename, url, description}
+        if (userData.media && Array.isArray(userData.media)) {
+          // Extract URLs from media objects, filtering out invalid entries
+          media = userData.media
+            .map(item => {
+              console.log('media item', item)
+              // Handle both object format {url: "...", ...} and direct string URLs
+              if (typeof item === 'string') {
+                return item
+              } else if (item && typeof item === 'object' && item.url) {
+                return item.url
+              }
+              return null
+            })
+            .filter(url => url && typeof url === 'string')
+
+          // If no valid URLs found, set to null
+          if (media.length === 0) {
+            media = null
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      }
+
+      token.tokenData.media = media?.length > 0 ? media : null
+      token.tokenData.userDataMarkdown = userDataMarkdown
+      token.userOwner = targetData.userId
+      token.collectionOwner = targetData.publicId
+
+      console.log('token', token)
+
+      console.log('settokensCache', tokensCache)
+
+      tokensCache[token.tokenId] = token
+      this.context.setTokensCache(tokensCache)
       // Update the token state for this token.
       this.persistTokenUpdate(token)
 

@@ -1,33 +1,17 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 380px;
-  width: 280px;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 320px;
   border-radius: 1rem;
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.25);
   background-color: var(--quinary-color);
   transition: all 0.5s;
   position: relative;
   border: 1px solid;
-  padding: 20px;
-
-  h2 {
-    font-size: 1.2rem;
-    padding: 0;
-    margin: 0;
-    color: var(--quaternary-color);
-    transition: all 0.5s;
-    letter-spacing: 0.1rem;
-    margin-top: 0.8rem;
-  }
-
-  h3 {
-    font-size: 1rem;
-    color: var(--tertiary-color);
-    font-weight: 500;
-    margin-left: 1rem;
-    transition: all 0.5s;
-  }
+  padding: 0;
+  overflow: hidden;
 }
 
 .publicNft {
@@ -40,13 +24,14 @@
 
 .nftTag {
   position: absolute;
-  top: -12px;
-  right: 10px;
+  top: 0px;
+  right: -1px;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
   background-color: white;
+  z-index: 2;
 }
 
 .publicNft .nftTag {
@@ -60,29 +45,31 @@
 }
 
 .nftWrapper {
-  max-height: 315px;
-  min-height: 285px;
   width: 100%;
+  height: 0;
+  padding-top: 70%;
   border-top-right-radius: 1rem;
   border-top-left-radius: 1rem;
   overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.1);
+  position: relative;
 
   img {
-    max-width: 100%;
-    max-height: 285px;
-    min-height: 285px;
-    min-width: 100%;
-    height: auto;
-    border-top-right-radius: 1rem;
-    border-top-left-radius: 1rem;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease-in-out;
-
-    &:hover {
-      cursor: pointer;
-      transform: scale(1.1);
-    }
   }
+}
+
+.nftMedia {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nft {
@@ -98,5 +85,95 @@
   &:hover {
     cursor: pointer;
     transform: scale(1.1);
+  }
+}
+
+.content {
+  padding: 16px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--quaternary-color);
+  letter-spacing: 0.03rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.about {
+  font-size: 0.85rem;
+  color: var(--tertiary-color);
+  margin: 0;
+  min-height: 2rem;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.primaryButton,
+.secondaryButton {
+  width: 100%;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.primaryButton {
+  background-color: var(--tertiary-color);
+  border: none;
+}
+
+.primaryButton:hover,
+.primaryButton:focus {
+  background-color: var(--tertiary-color);
+  filter: brightness(1.1);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  border: 2px solid var(--tertiary-color);
+  color: var(--tertiary-color);
+}
+
+.secondaryButton:hover,
+.secondaryButton:focus {
+  background-color: var(--tertiary-color);
+  color: #fff;
+}
+
+.downloadIcon {
+  font-size: 0.9rem;
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    max-width: 100%;
+  }
+
+  .content {
+    padding: 12px 12px 16px;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
+
+  .about {
+    font-size: 0.8rem;
   }
 }
