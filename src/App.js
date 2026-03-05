@@ -20,6 +20,7 @@ import DeletedSharable from './components/token-tiger/deletedSharable'
 
 import LoginForm from './pages/login'
 import PropagateLoader from 'react-spinners/PropagateLoader'
+import { GlobalContext } from './hooks/global-state'
 
 import {
   useParams
@@ -41,6 +42,8 @@ const defaultServerOptions = [
 let _this
 
 class Shared extends React.Component {
+  static contextType = GlobalContext
+
   constructor (props) {
     super(props)
 
@@ -77,29 +80,43 @@ class Shared extends React.Component {
       if (!userIdParam || !publicIdParam) {
         throw new Error('Wrong Link!!')
       }
+      console.log('startAsyncFunctions', this.context)
+      const { tokensCache, walletData, serversData, targetData } = this.context
+      let wallet = walletData
+      let servers = serversData
+      let _targetData = targetData
+
+      const existingData = Object.keys(tokensCache).length
+      if (!existingData) {
       // _this.addToModal('Loading minimal-slp-wallet')
 
-      await _this.asyncLoad.loadWalletLib()
+        await _this.asyncLoad.loadWalletLib()
 
-      // _this.addToModal('Getting alternative servers')
-      const servers = await _this.asyncLoad.getServers()
-      // console.log('servers: ', servers)
+        // _this.addToModal('Getting alternative servers')
+        servers = await _this.asyncLoad.getServers()
+        // console.log('servers: ', servers)
 
-      // _this.addToModal('Initializing wallet')
-      // console.log(`Initializing wallet with back end server ${serverUrl}`)
+        // _this.addToModal('Initializing wallet')
+        // console.log(`Initializing wallet with back end server ${serverUrl}`)
 
-      const wallet = await _this.asyncLoad.initWallet(serverUrl)
+        wallet = await _this.asyncLoad.initWallet(serverUrl)
 
-      // _this.addToModal('Fetching NFT Collection')
+        // _this.addToModal('Fetching NFT Collection')
 
-      await _this.fetchAddr(userIdParam, publicIdParam)
+        _targetData = await _this.fetchAddr(userIdParam, publicIdParam)
 
+        // Cache loaded data
+        this.context.setWalletCache(wallet)
+        this.context.setServersCache(servers)
+        this.context.setTargetDataCache(_targetData)
+      }
       _this.setState({
         wallet,
         serverUrl,
         servers,
         asyncInitFinished: true,
-        asyncInitSucceeded: true
+        asyncInitSucceeded: true,
+        targetData: _targetData
       })
     } catch (err) {
       console.warn(err)
@@ -190,7 +207,8 @@ class Shared extends React.Component {
     try {
       const result = await getSharableCollectionData({ userId, publicId })
       console.log('result', result)
-      _this.setState({ targetData: result })
+      const targetData = Object.assign({ userId, publicId }, result)
+      return targetData
     } catch (err) {
       if (err?.response?.data?.match('revoked')) {
         throw new Error('This Shareable Collection has been removed')

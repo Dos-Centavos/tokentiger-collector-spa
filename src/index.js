@@ -4,6 +4,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import TokenInfoPage from './components/token-tiger/token-info'
 import { QueryParamProvider } from 'use-query-params'
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6'
 
@@ -18,26 +19,32 @@ import {
 // Importing the Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
+import { GlobalProvider } from './hooks/global-state'
 const root = ReactDOM.createRoot(document.getElementById('root'))
-
 root.render(
   <>
 
     <BrowserRouter>
-      <QueryParamProvider adapter={ReactRouter6Adapter}>
-        <Routes>
-          <Route path='/users/share/nft/:userId/:publicId' element={<App />} />
-        </Routes>
-        <ToastContainer
-          position='top-right'
-          autoClose={1500}
-          hideProgressBar
-          newestOnTop={false}
-          rtl={false}
-          theme='colored'
-        />
+      <GlobalProvider>
 
-      </QueryParamProvider>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+
+          <Routes>
+            <Route path='/users/share/nft/:userId/:publicId' element={<App />} />
+            <Route path='/token/:tokenId' element={<TokenInfoPage />} />
+          </Routes>
+          <ToastContainer
+            position='top-right'
+            autoClose={1500}
+            hideProgressBar
+            newestOnTop={false}
+            rtl={false}
+            theme='colored'
+          />
+
+        </QueryParamProvider>
+      </GlobalProvider>
+
     </BrowserRouter>
 
   </>

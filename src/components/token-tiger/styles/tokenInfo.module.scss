@@ -1,0 +1,130 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding: 4rem 0 5rem;
+  position: relative;
+}
+
+.container {
+  max-width: 72rem;
+}
+
+.backButton {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  background-color: var(--quinary-color);
+  border: 1px solid var(--quaternary-color);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  z-index: 20;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.backButton:hover,
+.backButton:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.backIcon {
+  font-size: 1.1rem;
+  color: var(--secondary-color);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.imageWrapper {
+  width: 100%;
+  max-width: 28rem;
+  height: clamp(14rem, 50vw, 22rem);
+  margin: 0 auto 1.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  background: radial-gradient(circle at top left, #3b9f6f, #000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-color);
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.carousel {
+  width: 100%;
+  height: 100%;
+
+  :global(.carousel-inner) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.carousel-item) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4.5vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.subtitle {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--tertiary-color);
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content {
+  margin-top: 2rem;
+}
+
+@media screen and (max-width: 768px) {
+  .main {
+    padding: 3.5rem 0 4rem;
+  }
+
+  .subtitle {
+    padding: 0 1rem;
+  }
+}
+
