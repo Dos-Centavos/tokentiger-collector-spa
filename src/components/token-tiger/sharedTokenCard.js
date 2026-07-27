@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload } from '@fortawesome/free-solid-svg-icons'
+import { faDownload, faShoppingCart } from '@fortawesome/free-solid-svg-icons'
 import { PropagateLoader } from 'react-spinners'
 import { useNavigate } from 'react-router-dom'
 
@@ -19,6 +19,9 @@ export default function SharedTokenCard (props) {
     if (!token.tokenData) return
     setIsPublic(!!token.tokenData.payloadCid)
   }, [token.tokenData])
+  console.log('token', token)
+  const isForSale = token.tokenData?.onSale && !!token.tokenData?.marketData
+  console.log('isForSale', isForSale)
 
   // Get about from mutableData
   const about = token.tokenData?.mutableData?.about || token.about || ''
@@ -46,6 +49,14 @@ export default function SharedTokenCard (props) {
         isPublic ? sharedTStyles.publicNft : sharedTStyles.privateNft
       }`}
     >
+      {/* For Sale tag */}
+      {!token.iconNeedsDownload && isForSale && (
+        <div className={sharedTStyles.forSaleTag}>
+          <FontAwesomeIcon icon={faShoppingCart} className={sharedTStyles.forSaleIcon} />
+          For Sale
+        </div>
+      )}
+
       {/* Visibility tag */}
       {!token.iconNeedsDownload && (
         <div className={sharedTStyles.nftTag}>

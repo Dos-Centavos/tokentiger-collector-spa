@@ -22,6 +22,40 @@
   border-color: #FF9800;
 }
 
+.forSaleTag {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #5cc49a 0%, #3b9f6f 50%, #2a7a55 100%);
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 4px 14px rgba(59, 159, 111, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.forSaleIcon {
+  font-size: 0.7rem;
+}
+
+.container:hover .forSaleTag {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px rgba(59, 159, 111, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
 .nftTag {
   position: absolute;
   top: 0px;

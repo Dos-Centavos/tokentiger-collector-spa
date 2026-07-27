@@ -105,8 +105,70 @@
   letter-spacing: 0.03em;
 }
 
+.buyWrapper {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.buyButton {
+  padding: 1rem 3.5rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  min-height: 56px;
+  min-width: 220px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #5cc49a 0%, #3b9f6f 50%, #2a7a55 100%);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  box-shadow:
+    0 8px 28px rgba(59, 159, 111, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.buyButton:hover {
+  transform: translateY(-3px) scale(1.03);
+  background: linear-gradient(135deg, #6ed4ab 0%, #45b07f 50%, #328f65 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 14px 36px rgba(59, 159, 111, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.buyButton:active {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 6px 20px rgba(59, 159, 111, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.buyIcon {
+  font-size: 1.25rem;
+  transition: transform 0.25s ease;
+}
+
+.buyButton:hover .buyIcon {
+  transform: scale(1.15);
+}
+
 .subtitle {
-  margin-top: 0.75rem;
+  margin-top: 1.25rem;
   font-size: 0.95rem;
   color: var(--tertiary-color);
   max-width: 40rem;
