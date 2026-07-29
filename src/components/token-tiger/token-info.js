@@ -1,5 +1,7 @@
 import React, { useContext } from 'react'
 import { Container, Carousel } from 'react-bootstrap'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faShoppingCart } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import Header from './header'
@@ -11,6 +13,7 @@ import { GlobalContext } from '../../hooks/global-state.js'
 
 export default function TokenInfoPage () {
   const { tokensCache } = useContext(GlobalContext)
+  console.log('tokensCache', tokensCache)
   const navigate = useNavigate()
   const { tokenId } = useParams()
 
@@ -18,8 +21,12 @@ export default function TokenInfoPage () {
   if (!token) return null
 
   const { tokenData } = token
+  console.log('tokenData', tokenData)
   const media = tokenData?.media
   const markdownContent = tokenData?.userDataMarkdown
+  const marketData = tokenData.marketData
+  const onSale = tokenData.onSale
+  console.log('marketData', marketData)
 
   const handleBack = () => {
     const userId = token.userOwner
@@ -29,6 +36,11 @@ export default function TokenInfoPage () {
     } else {
       navigate(-1)
     }
+  }
+
+  const onBuy = async () => {
+    const url = `${process.env.REACT_APP_FRONT_URL}/buy/${tokenId}`
+    window.open(url, '_blank')
   }
 
   return (
@@ -80,6 +92,14 @@ export default function TokenInfoPage () {
                   )}
             </div>
             <h1 className={styles.title}>{token.name}</h1>
+            {onSale && marketData && (
+              <div className={styles.buyWrapper}>
+                <div className={styles.buyButton} aria-hidden='true'>
+                  <FontAwesomeIcon icon={faShoppingCart} className={styles.buyIcon} />
+                  <span onClick={onBuy}>Buy NFT</span>
+                </div>
+              </div>
+            )}
             <p className={styles.subtitle}>{token.about}</p>
           </header>
           <section className={styles.content} aria-label='Token information'>
