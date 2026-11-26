@@ -25,6 +25,35 @@ import { GlobalContext } from '../../hooks/global-state.js'
 
 let targetData = ''
 
+// Order the wallet tokens by the persisted display order (sortNum) returned by
+// the API's sharable collection GET endpoint
+// (GET /users/share/nft/:userId/:publicId). Tokens without a numeric sortNum
+// keep their relative wallet order and are placed after positioned tokens.
+function sortTokensBySortNum (tokens, orderedTokens) {
+  if (!Array.isArray(tokens) || tokens.length < 2) return tokens
+
+  const positions = new Map()
+  if (Array.isArray(orderedTokens)) {
+    for (const token of orderedTokens) {
+      if (token && token.tokenId && typeof token.sortNum === 'number') {
+        positions.set(token.tokenId, token.sortNum)
+      }
+    }
+  }
+
+  return tokens
+    .map((token, index) => ({
+      token,
+      index,
+      position: token && positions.has(token.tokenId) ? positions.get(token.tokenId) : Infinity
+    }))
+    .sort((a, b) => {
+      if (a.position === b.position) return a.index - b.index
+      return a.position - b.position
+    })
+    .map((entry) => entry.token)
+}
+
 // let _this
 
 class GetNfts extends React.Component {
@@ -185,7 +214,9 @@ class GetNfts extends React.Component {
       if (existingData) {
         console.log('Loading data from global state')
         this.setState({
-          tokens: Object.values(tokensCache),
+          // Re-apply the persisted order from the API payload. The cache is
+          // populated in download order, not display order.
+          tokens: sortTokensBySortNum(Object.values(tokensCache), targetData?.tokens),
           iconsAreLoaded: true,
           tokensFetched: true
         })
@@ -214,8 +245,12 @@ class GetNfts extends React.Component {
       const nftCandidates = tokens.filter(x => x.qty === 1 && x.decimals === 0)
       console.log(`nftCandidates: ${JSON.stringify(nftCandidates, null, 2)}`)
 
+      // Apply the persisted display order returned by the API's sharable
+      // collection endpoint before any cards are rendered.
+      const orderedCandidates = sortTokensBySortNum(nftCandidates, targetData?.tokens)
+
       // Add the JDenticon icon
-      nftCandidates.map((x) => {
+      orderedCandidates.map((x) => {
         x.icon = (<Jdenticon size='100' value={x.tokenId} />)
         x.iconNeedsDownload = true
 
@@ -224,12 +259,12 @@ class GetNfts extends React.Component {
 
       // This is an async function, but is deliberately called without 'await',
       // so that it does not block execution.
-      this.lazyLoadTokenIcons(nftCandidates)
+      this.lazyLoadTokenIcons(orderedCandidates)
 
       this.setState({
         // balance: `Balance: ${balance} sats, ${bchBalance} BCH`,
         balance: '',
-        tokens: nftCandidates,
+        tokens: orderedCandidates,
         iconsAreLoaded: false,
         tokensFetched: true
       })
